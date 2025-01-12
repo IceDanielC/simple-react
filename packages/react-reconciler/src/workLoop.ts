@@ -1,18 +1,12 @@
 import { beginWork } from './beginWork'
-import { completeWork } from './completeWork'
-import { FiberNode } from './fiber'
+import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber'
+import { HostRoot } from './workTags'
 
 let workInProgress: FiberNode | null = null
 
 // 执行初始化
-function prepareFreshStack(fiber: FiberNode) {
-	workInProgress = fiber
-}
-
-function workLoop() {
-	while (workInProgress !== null) {
-		performUnitOfWork(workInProgress)
-	}
+function prepareFreshStack(root: FiberRootNode) {
+	workInProgress = createWorkInProgress(root.current, {})
 }
 
 function performUnitOfWork(fiber: FiberNode) {
@@ -28,19 +22,48 @@ function performUnitOfWork(fiber: FiberNode) {
 
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber
-	do {
-		completeWork(node)
-		const sibling = node.sibling
-		if (sibling !== null) {
-			workInProgress = sibling
-			return
-		}
-		node = node.return
-		workInProgress = node
-	} while (node !== null)
+	let parent = node.return
+	while (parent !== null) {
+		node = parent
+		parent = node.return
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode
+	}
+	return null
 }
 
-function renderRoot(root: FiberNode) {
+export function scheduleUpdateOnFiber(fiber: FiberNode) {
+	// TODO 调度功能
+
+	// 拿到fiberRootNode
+	const root = markUpdateFromFibertoRoot(fiber)
+	// 开始渲染
+	renderRoot(root)
+}
+
+// 找到传入fiber的fiberRootNode
+function markUpdateFromFibertoRoot(fiber: FiberNode) {
+	let node = fiber
+	let parent = node.return
+	while (parent !== null) {
+		node.return = parent
+		node = parent
+		parent = node.return
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode
+	}
+	return null
+}
+
+function workLoop() {
+	while (workInProgress !== null) {
+		performUnitOfWork(workInProgress)
+	}
+}
+
+function renderRoot(root: FiberRootNode) {
 	prepareFreshStack(root)
 	do {
 		try {

@@ -25,17 +25,17 @@ export const createUpdateQueue = <State>() => {
 	return {
 		shared: {
 			pending: null
-		},
-		dispatch: (action: UpdateAction<State>) => {
-			const update = createUpdate(action)
-			enqueueUpdate(update, baseQueue)
 		}
+		// dispatch: (action: UpdateAction<State>) => {
+		// 	const update = createUpdate(action)
+		// 	enqueueUpdate(update, baseQueue)
+		// }
 	} as UpdateQueue<State>
 }
 
-const enqueueUpdate = <Action>(
-	update: Update<Action>,
-	updateQueue: UpdateQueue<Action>
+export const enqueueUpdate = <Action>(
+	updateQueue: UpdateQueue<Action>,
+	update: Update<Action>
 ) => {
 	// const pending = updateQueue.shared.pending
 	// if (pending === null) {

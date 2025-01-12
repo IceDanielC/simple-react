@@ -12,9 +12,7 @@ export const beginWork = (wip: FiberNode) => {
 		case HostText:
 			return null
 		default:
-			if (__DEV__) {
-				console.warn('未实现的beginWork')
-			}
+			console.warn('未实现的beginWork')
 			break
 	}
 	return null
