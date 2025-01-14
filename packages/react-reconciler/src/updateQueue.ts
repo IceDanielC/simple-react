@@ -33,17 +33,18 @@ export const createUpdateQueue = <State>() => {
 	} as UpdateQueue<State>
 }
 
-export const enqueueUpdate = <Action>(
-	updateQueue: UpdateQueue<Action>,
-	update: Update<Action>
+export const enqueueUpdate = <State>(
+	updateQueue: UpdateQueue<State>,
+	update: Update<State>
 ) => {
-	// const pending = updateQueue.shared.pending
-	// if (pending === null) {
-	// 	update.next = update
-	// } else {
-	// 	update.next = pending.next
-	// 	pending.next = update
-	// }
+	const pending = updateQueue.shared.pending
+	if (pending === null) {
+		// 第一个update
+		update.next = update
+	} else {
+		update.next = pending.next
+		pending.next = update
+	}
 	updateQueue.shared.pending = update
 }
 
