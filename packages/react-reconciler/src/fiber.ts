@@ -7,25 +7,27 @@ export class FiberNode {
 	tag: WorkTag
 	key: Key
 	type: any
+	// stateNode 就是fiber对应的DOM节点，比如hostComponent对应的就是div的实例 -> div Dom
 	stateNode: any
 	return: FiberNode | null
 	child: FiberNode | null
 	sibling: FiberNode | null
 	index: number
 	ref: any
+
 	pendingProps: Props
 	memoizedProps: Props | null
 	memoizedState: any
+	updateQueue: unknown
 
 	alternate: FiberNode | null
 	flags: Flags
-	updateQueue: unknown
+	subtreeFlags: Flags
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag
 		this.key = key
 		this.type = null
-		// stateNode 就是fiber对应的DOM节点，比如hostComponent对应的就是div的实例 -> div Dom
 		this.stateNode = null
 		this.ref = null
 
@@ -45,6 +47,7 @@ export class FiberNode {
 		this.alternate = null
 		// 副作用
 		this.flags = NoFlags
+		this.subtreeFlags = NoFlags
 	}
 }
 
@@ -79,6 +82,7 @@ export const createWorkInProgress = (
 		// update
 		wip.pendingProps = pendingProps
 		wip.flags = NoFlags
+		wip.subtreeFlags = NoFlags
 	}
 	wip.type = current.type
 	wip.updateQueue = current.updateQueue

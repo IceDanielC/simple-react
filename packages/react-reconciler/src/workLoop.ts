@@ -65,6 +65,7 @@ function workLoop() {
 
 function renderRoot(root: FiberRootNode) {
 	prepareFreshStack(root)
+
 	do {
 		try {
 			workLoop()
@@ -76,4 +77,10 @@ function renderRoot(root: FiberRootNode) {
 			workInProgress = null
 		}
 	} while (true)
+
+	// beginWork和completeWork的产物：wip fiber树
+	const finishedWork = root.current.alternate
+	root.finishedWork = finishedWork
+
+	commitRoot(root)
 }
