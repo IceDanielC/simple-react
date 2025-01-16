@@ -66,6 +66,9 @@ export class FiberRootNode {
 	}
 }
 
+/**
+ * 创建一个wip，并通过alternate连接传入的HostRootFiber
+ */
 export const createWorkInProgress = (
 	current: FiberNode,
 	pendingProps: Props

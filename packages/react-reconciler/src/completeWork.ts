@@ -1,8 +1,10 @@
 // 递归中的归阶段
 import {
 	appendInitialChild,
+	Container,
 	createInstance,
-	createTextInstance
+	createTextInstance,
+	Instance
 } from 'hostConfig'
 import { FiberNode } from './fiber'
 import { HostComponent, HostRoot, HostText } from './workTags'
@@ -19,8 +21,8 @@ export const completeWork = (wip: FiberNode) => {
 			} else {
 				// mount
 				// 构建DOM
-				const instance = createInstance(wip.tag, newProps)
-				// 将DOM插入到DOM树中
+				const instance = createInstance(wip.type, newProps)
+				// 将DOM插入到DOM树(instance)中
 				appendAllChildren(instance, wip)
 				wip.stateNode = instance
 			}
@@ -50,7 +52,7 @@ export const completeWork = (wip: FiberNode) => {
 	return null
 }
 
-function appendAllChildren(parent: FiberNode, wip: FiberNode) {
+function appendAllChildren(parent: Container | Instance, wip: FiberNode) {
 	let node = wip.child
 	while (node !== null) {
 		if (node.tag === HostComponent || node.tag === HostText) {
@@ -77,6 +79,9 @@ function appendAllChildren(parent: FiberNode, wip: FiberNode) {
 	}
 }
 
+/**
+ * 将wip的 child 和 sibling 的 flags 向上收集
+ *  */
 function bubbleProperties(wip: FiberNode) {
 	let subtreeFlags = NoFlags
 	let child = wip.child

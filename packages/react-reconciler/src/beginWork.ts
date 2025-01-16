@@ -24,8 +24,8 @@ export const beginWork = (wip: FiberNode) => {
 }
 
 function updateHostRoot(wip: FiberNode) {
-	const baseState = wip.memoizedState
-	const updateQueue = wip.updateQueue as UpdateQueue<Element>
+	const baseState = wip.memoizedState // 初始化时为null
+	const updateQueue = wip.updateQueue as UpdateQueue<ReactElementType | Element>
 	const pending = updateQueue.shared.pending
 	updateQueue.shared.pending = null
 	if (pending !== null) {
@@ -44,11 +44,15 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child
 }
 
+/**
+ * 创建wip的子Fiber
+ */
 function reconcileChildren(wip: FiberNode, children?: ReactElementType) {
 	const current = wip.alternate
 
 	if (current !== null) {
 		// update
+		// 首次渲染过程中，只有 HostRoot 会走到这里
 		wip.child = reconcileChildFibers(wip, current?.child, children)
 	} else {
 		// mount

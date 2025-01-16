@@ -27,8 +27,9 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber
 	}
 
+	// 给fiber的flags打上Placement标记，并返回
 	function placeSingleChild(fiber: FiberNode) {
-		// 初次挂载
+		// 初次挂载，打上Placement标记
 		if (shouldTrackEffects && fiber.alternate === null) {
 			fiber.flags |= Placement
 		}

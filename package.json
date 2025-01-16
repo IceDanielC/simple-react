@@ -6,12 +6,13 @@
 	"scripts": {
 		"lint": "eslint --ext .js,.jsx,.ts,.tsx --fix --quiet ./packages",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/react.config.js"
+		"build:dev": "rimraf dist && rollup --bundleConfigAsCjs --config scripts/rollup/dev.config.js"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"@rollup/plugin-alias": "^5.1.1",
 		"@rollup/plugin-commonjs": "^25.0.7",
 		"@rollup/plugin-replace": "^5.0.5",
 		"@typescript-eslint/eslint-plugin": "^6.10.0",

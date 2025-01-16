@@ -19,6 +19,9 @@ export function createContainer(container: Container) {
 	return root
 }
 
+/**
+ * 将React.createElement().render(<App />)中的<App />(ReactElementType)放到UpdaeteQueue中
+ */
 export function updateContainer(
 	element: ReactElementType | null,
 	root: FiberRootNode

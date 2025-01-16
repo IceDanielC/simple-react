@@ -1,5 +1,8 @@
 import { beginWork } from './beginWork'
+import { commitMutationEffects } from './commitWork'
+import { completeWork } from './completeWork'
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber'
+import { MutationMask, NoFlags } from './fiberFlags'
 import { HostRoot } from './workTags'
 
 let workInProgress: FiberNode | null = null
@@ -10,27 +13,33 @@ function prepareFreshStack(root: FiberRootNode) {
 }
 
 function performUnitOfWork(fiber: FiberNode) {
-	const next = beginWork(fiber)
+	const nextFiber = beginWork(fiber)
 	fiber.memoizedProps = fiber.pendingProps
-	if (next === null) {
+	if (nextFiber === null) {
 		// 没有子节点，向上归
 		completeUnitOfWork(fiber)
 	} else {
-		workInProgress = next
+		workInProgress = nextFiber
 	}
 }
 
 function completeUnitOfWork(fiber: FiberNode) {
 	let node: FiberNode | null = fiber
-	let parent = node.return
-	while (parent !== null) {
-		node = parent
-		parent = node.return
-	}
-	if (node.tag === HostRoot) {
-		return node.stateNode
-	}
-	return null
+	do {
+		// 完成当前节点的“归”阶段
+		completeWork(node)
+
+		const sibling = node.sibling
+		if (sibling !== null) {
+			workInProgress = sibling
+			// 别着急 complete，先返回，开启兄弟节点的“递”阶段
+			return
+		}
+
+		// 完成父节点的“归”阶段
+		node = node.return
+		workInProgress = node
+	} while (node !== null)
 }
 
 export function scheduleUpdateOnFiber(fiber: FiberNode) {
@@ -83,4 +92,36 @@ function renderRoot(root: FiberRootNode) {
 	root.finishedWork = finishedWork
 
 	commitRoot(root)
+}
+
+function commitRoot(root: FiberRootNode) {
+	const finishedWork = root.finishedWork
+	if (finishedWork === null) {
+		return
+	}
+
+	if (__DEV__) {
+		console.warn('commit阶段开始', finishedWork)
+	}
+
+	// 重制
+	root.finishedWork = null
+
+	// 判断是否存在3个子阶段需要执行的操作
+	const subtreeHasEffect =
+		(finishedWork.subtreeFlags & MutationMask) !== NoFlags
+	const rootHasEffect = (finishedWork.flags & MutationMask) !== NoFlags
+
+	if (subtreeHasEffect || rootHasEffect) {
+		// beforeMutation
+		// mutation => Placement
+		commitMutationEffects(finishedWork)
+		root.current = finishedWork
+		// 把 wip fiber树 插入到DOM树中
+	} else {
+		root.current = finishedWork
+		if (__DEV__) {
+			console.warn('未找到对应的Mutation')
+		}
+	}
 }

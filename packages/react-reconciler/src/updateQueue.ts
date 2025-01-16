@@ -2,7 +2,7 @@ import { UpdateAction } from 'shared/ReactTypes'
 
 export interface Update<State> {
 	action: UpdateAction<State>
-	next: Update<any> | null
+	// next: Update<any> | null
 }
 
 export interface UpdateQueue<State> {
@@ -16,8 +16,7 @@ export const createUpdate = <State>(
 	action: UpdateAction<State>
 ): Update<State> => {
 	return {
-		action,
-		next: null
+		action
 	}
 }
 
@@ -37,14 +36,14 @@ export const enqueueUpdate = <State>(
 	updateQueue: UpdateQueue<State>,
 	update: Update<State>
 ) => {
-	const pending = updateQueue.shared.pending
-	if (pending === null) {
-		// 第一个update
-		update.next = update
-	} else {
-		update.next = pending.next
-		pending.next = update
-	}
+	// const pending = updateQueue.shared.pending
+	// if (pending === null) {
+	// 	// 第一个update
+	// 	update.next = update
+	// } else {
+	// 	update.next = pending.next
+	// 	pending.next = update
+	// }
 	updateQueue.shared.pending = update
 }
 
@@ -58,19 +57,15 @@ export const processUpdateQueue = <State>(
 	}
 	if (pendingUpdate !== null) {
 		// 第一个update
-		const first = pendingUpdate.next
-		let pending = pendingUpdate.next as Update<any>
-		do {
-			const action = pending.action
-			if (action instanceof Function) {
-				// baseState 1 update (x) => 4x -> memoizedState 4
-				result.memoizedState = action(baseState)
-			} else {
-				// baseState 1 update 2 -> memoizedState 2
-				result.memoizedState = action
-			}
-			pending = pending.next as Update<any>
-		} while (pending !== first)
+		const pending = pendingUpdate as Update<any>
+		const action = pending.action
+		if (action instanceof Function) {
+			// baseState 1 update (x) => 4x -> memoizedState 4
+			result.memoizedState = action(baseState)
+		} else {
+			// baseState 1 update 2 -> memoizedState 2
+			result.memoizedState = action
+		}
 	}
 	return result
 }
